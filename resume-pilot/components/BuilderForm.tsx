@@ -47,28 +47,60 @@ export default function BuilderForm({ data, onChange, template, onTemplateChange
 
   return (
     <div className="space-y-6">
-      {/* Template switcher */}
-      <Card title="Template">
-        <div className="grid grid-cols-3 gap-3 mt-3">
-          {templates.map((t) => (
-            <button
-              key={t.id}
-              onClick={() => onTemplateChange(t.id)}
-              className={`relative p-3 rounded-xl border-2 text-left transition-all duration-200 ${
-                template === t.id
-                  ? "border-blue-500 bg-blue-50"
-                  : "border-slate-200 hover:border-slate-300 bg-white"
-              }`}
-            >
-              {template === t.id && (
-                <span className="absolute top-2 right-2 w-4 h-4 bg-blue-500 rounded-full flex items-center justify-center">
-                  <svg width="8" height="8" viewBox="0 0 8 8" fill="none"><path d="M1.5 4l1.8 1.8L6.5 2.5" stroke="white" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                </span>
-              )}
-              <p className={`text-xs font-semibold ${template === t.id ? "text-blue-700" : "text-slate-700"}`}>{t.label}</p>
-              <p className="text-[10px] text-slate-500 mt-0.5">{t.desc}</p>
-            </button>
-          ))}
+      {/* Settings (Document Type & Template) */}
+      <Card title="Document Settings">
+        <div className="space-y-4">
+          <div>
+            <label className="block text-xs font-semibold text-slate-600 mb-1.5">Document Type</label>
+            <div className="flex bg-slate-100 rounded-xl p-1">
+              <button
+                type="button"
+                onClick={() => set("documentType", "resume")}
+                className={`flex-1 py-2 text-xs font-semibold rounded-lg transition-all ${
+                  data.documentType === "resume"
+                    ? "bg-white text-blue-600 shadow-sm"
+                    : "text-slate-600 hover:text-slate-800"
+                }`}
+              >
+                Resume (Compact ATS layout)
+              </button>
+              <button
+                type="button"
+                onClick={() => set("documentType", "cv")}
+                className={`flex-1 py-2 text-xs font-semibold rounded-lg transition-all ${
+                  data.documentType === "cv"
+                    ? "bg-white text-blue-600 shadow-sm"
+                    : "text-slate-600 hover:text-slate-800"
+                }`}
+              >
+                CV (Detailed Academic layout)
+              </button>
+            </div>
+          </div>
+          <div>
+            <label className="block text-xs font-semibold text-slate-600 mb-1.5">Template Style</label>
+            <div className="grid grid-cols-3 gap-2">
+              {templates.map((t) => (
+                <button
+                  key={t.id}
+                  onClick={() => onTemplateChange(t.id)}
+                  className={`relative p-2.5 rounded-xl border-2 text-left transition-all duration-200 ${
+                    template === t.id
+                      ? "border-blue-500 bg-blue-50"
+                      : "border-slate-200 hover:border-slate-300 bg-white"
+                  }`}
+                >
+                  {template === t.id && (
+                    <span className="absolute top-1.5 right-1.5 w-3.5 h-3.5 bg-blue-500 rounded-full flex items-center justify-center">
+                      <svg width="6" height="6" viewBox="0 0 8 8" fill="none"><path d="M1.5 4l1.8 1.8L6.5 2.5" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                    </span>
+                  )}
+                  <p className={`text-xs font-bold ${template === t.id ? "text-blue-700" : "text-slate-700"}`}>{t.label}</p>
+                  <p className="text-[9px] text-slate-500 mt-0.5 leading-tight">{t.desc}</p>
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
       </Card>
 
@@ -79,6 +111,9 @@ export default function BuilderForm({ data, onChange, template, onTemplateChange
           <Field label="Email" value={data.email} onChange={(v) => set("email", v)} placeholder="jane@example.com" type="email" />
           <Field label="Phone" value={data.phone} onChange={(v) => set("phone", v)} placeholder="+91 98765 43210" />
           <Field label="LinkedIn" value={data.linkedin} onChange={(v) => set("linkedin", v)} placeholder="linkedin.com/in/janesmith" />
+        </div>
+        <div className="mt-3">
+          <Field label="Address" value={data.address} onChange={(v) => set("address", v)} placeholder="New Delhi, India" />
         </div>
         <div className="mt-3">
           <label className="block text-xs font-medium text-slate-600 mb-1">Professional Summary <span className="text-slate-400 font-normal">(optional)</span></label>
@@ -203,6 +238,65 @@ export default function BuilderForm({ data, onChange, template, onTemplateChange
         </div>
       </Card>
 
+      {/* Achievements */}
+      <Card title="Achievements">
+        <div className="mt-3">
+          <label className="block text-xs font-medium text-slate-600 mb-1">List your achievements or awards (one per line)</label>
+          <textarea
+            value={data.achievements}
+            onChange={(e) => set("achievements", e.target.value)}
+            rows={4}
+            placeholder="Won 1st place in National Hackathon 2023&#10;Dean's List for Academic Excellence – 2022&#10;Published research paper in IEEE journal"
+            className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white placeholder:text-slate-300 resize-none"
+          />
+        </div>
+      </Card>
+
+      {/* Languages */}
+      <Card title="Languages">
+        <div className="mt-3">
+          <label className="block text-xs font-medium text-slate-600 mb-1">List your spoken languages (e.g. English, Spanish - comma-separated)</label>
+          <input
+            value={data.languages}
+            onChange={(e) => set("languages", e.target.value)}
+            placeholder="English (Fluent), Spanish (Conversational), French (Basic)"
+            className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white placeholder:text-slate-300 transition-shadow"
+          />
+        </div>
+      </Card>
+
+      {/* Publications (CV only) */}
+      {data.documentType === "cv" && (
+        <Card title="Publications & Research">
+          <div className="mt-3">
+            <label className="block text-xs font-medium text-slate-600 mb-1">List academic publications, papers, or major presentations (one per line)</label>
+            <textarea
+              value={data.publications || ""}
+              onChange={(e) => set("publications", e.target.value)}
+              rows={4}
+              placeholder="Smith, J. (2024). 'Optimizing Neural Networks for Web Performance'. Journal of Web Science, 12(3).&#10;Presented 'Client-Side PDF Processing' at JSConf 2023."
+              className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white placeholder:text-slate-300 resize-none"
+            />
+          </div>
+        </Card>
+      )}
+
+      {/* Additional Details (CV only) */}
+      {data.documentType === "cv" && (
+        <Card title="Additional Details / Hobbies">
+          <div className="mt-3">
+            <label className="block text-xs font-medium text-slate-600 mb-1">Any other sections, personal details, or info to include (one per line)</label>
+            <textarea
+              value={data.additionalDetails || ""}
+              onChange={(e) => set("additionalDetails", e.target.value)}
+              rows={4}
+              placeholder="Volunteered as Coding Instructor for underrepresented youths.&#10;Interests: Competitive programming, Hiking, Classical guitar."
+              className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white placeholder:text-slate-300 resize-none"
+            />
+          </div>
+        </Card>
+      )}
+
       {/* Download button */}
       <button
         onClick={onDownload}
@@ -211,7 +305,7 @@ export default function BuilderForm({ data, onChange, template, onTemplateChange
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <path d="M8 2v8M5 7l3 3 3-3M2 12v1a1 1 0 001 1h10a1 1 0 001-1v-1"/>
         </svg>
-        Download Resume as PDF
+        Download {data.documentType === "cv" ? "CV" : "Resume"} as PDF
       </button>
     </div>
   );

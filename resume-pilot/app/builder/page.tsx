@@ -10,16 +10,22 @@ import { ResumeData, TemplateType } from "@/types/resume";
 import { resumeDataToText, calculateATSScore } from "@/lib/ats";
 
 const defaultData: ResumeData = {
+  documentType: "resume",
   fullName: "",
   email: "",
   phone: "",
   linkedin: "",
+  address: "",
   summary: "",
   education: [{ id: "edu-1", institution: "", degree: "", field: "", startYear: "", endYear: "", gpa: "" }],
   skills: "",
   projects: [{ id: "proj-1", name: "", description: "", technologies: "", link: "" }],
   experience: [{ id: "exp-1", company: "", role: "", startDate: "", endDate: "", description: "", current: false }],
   certifications: "",
+  achievements: "",
+  languages: "",
+  publications: "",
+  additionalDetails: "",
 };
 
 export default function BuilderPage() {

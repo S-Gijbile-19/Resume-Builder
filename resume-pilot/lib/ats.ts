@@ -1,4 +1,4 @@
-import { ATSResult, ResumeData } from "@/types/resume";
+import { ATSResult, ResumeData, AdvancedAnalysisResult, SectionScore } from "@/types/resume";
 
 export function calculateATSScore(text: string): ATSResult {
   const lower = text.toLowerCase();
@@ -98,16 +98,29 @@ export function calculateATSScore(text: string): ATSResult {
 
 export function calculateCompletion(data: ResumeData): number {
   let filled = 0;
-  const total = 9;
+  let total = 11; // Base fields for Resume: fullName, email, phone, linkedin, address, summary, education, skills, projects, experience, certifications
+
   if (data.fullName.trim()) filled++;
   if (data.email.trim()) filled++;
   if (data.phone.trim()) filled++;
   if (data.linkedin.trim()) filled++;
+  if (data.address.trim()) filled++;
+  if (data.summary.trim()) filled++;
   if (data.education.length > 0 && data.education[0].institution.trim()) filled++;
   if (data.skills.trim()) filled++;
   if (data.projects.length > 0 && data.projects[0].name.trim()) filled++;
   if (data.experience.length > 0 && data.experience[0].company.trim()) filled++;
   if (data.certifications.trim()) filled++;
+
+  if (data.documentType === "cv") {
+    total += 3; // achievements, languages, publications/additionalDetails
+    if (data.achievements.trim()) filled++;
+    if (data.languages.trim()) filled++;
+    if ((data.publications && data.publications.trim()) || (data.additionalDetails && data.additionalDetails.trim())) {
+      filled++;
+    }
+  }
+
   return Math.round((filled / total) * 100);
 }
 
@@ -124,11 +137,18 @@ export function getMissingSections(data: ResumeData): string[] {
   if (!data.email.trim()) missing.push("Email");
   if (!data.phone.trim()) missing.push("Phone");
   if (!data.linkedin.trim()) missing.push("LinkedIn");
+  if (!data.address.trim()) missing.push("Address");
+  if (!data.summary.trim()) missing.push("Professional Summary");
   if (!data.education.length || !data.education[0].institution.trim()) missing.push("Education");
   if (!data.skills.trim()) missing.push("Skills");
   if (!data.projects.length || !data.projects[0].name.trim()) missing.push("Projects");
   if (!data.experience.length || !data.experience[0].company.trim()) missing.push("Experience");
   if (!data.certifications.trim()) missing.push("Certifications");
+
+  if (data.documentType === "cv") {
+    if (!data.achievements.trim()) missing.push("Achievements");
+    if (!data.languages.trim()) missing.push("Languages");
+  }
   return missing;
 }
 
@@ -136,8 +156,10 @@ export function resumeDataToText(data: ResumeData): string {
   const lines: string[] = [];
   lines.push(data.fullName);
   lines.push(`Email: ${data.email} | Phone: ${data.phone} | LinkedIn: ${data.linkedin}`);
+  if (data.address) lines.push(`Address: ${data.address}`);
   if (data.summary) lines.push(`\nSummary\n${data.summary}`);
-  if (data.education.length) {
+  
+  if (data.education.length && data.education[0].institution) {
     lines.push("\nEducation");
     data.education.forEach((e) => {
       lines.push(`${e.degree} in ${e.field} – ${e.institution} (${e.startYear}–${e.endYear})`);
@@ -145,14 +167,15 @@ export function resumeDataToText(data: ResumeData): string {
     });
   }
   if (data.skills) lines.push(`\nSkills\n${data.skills}`);
-  if (data.experience.length) {
+  
+  if (data.experience.length && data.experience[0].company) {
     lines.push("\nExperience");
     data.experience.forEach((ex) => {
       lines.push(`${ex.role} at ${ex.company} (${ex.startDate} – ${ex.current ? "Present" : ex.endDate})`);
       lines.push(ex.description);
     });
   }
-  if (data.projects.length) {
+  if (data.projects.length && data.projects[0].name) {
     lines.push("\nProjects");
     data.projects.forEach((p) => {
       lines.push(`${p.name} – ${p.technologies}`);
@@ -160,5 +183,207 @@ export function resumeDataToText(data: ResumeData): string {
     });
   }
   if (data.certifications) lines.push(`\nCertifications\n${data.certifications}`);
+  if (data.achievements) lines.push(`\nAchievements\n${data.achievements}`);
+  if (data.languages) lines.push(`\nLanguages\n${data.languages}`);
+  if (data.publications) lines.push(`\nPublications\n${data.publications}`);
+  if (data.additionalDetails) lines.push(`\nAdditional Details\n${data.additionalDetails}`);
+  
   return lines.join("\n");
+}
+
+export function analyzeResumeText(text: string): AdvancedAnalysisResult {
+  const lower = text.toLowerCase();
+  const wordCount = text.split(/\s+/).filter(Boolean).length;
+  const strengths: string[] = [];
+  const weaknesses: string[] = [];
+  const missingSections: string[] = [];
+  const recommendations: string[] = [];
+
+  // Action Verbs
+  const actionVerbs = ["led", "managed", "developed", "built", "designed", "created", "implemented", "optimized", "increased", "decreased", "reduced", "improved", "automated", "solved", "analyzed", "collaborated", "spearheaded", "generated", "delivered", "coordinated", "executed", "formulated"];
+  const verbMatches = actionVerbs.filter(verb => new RegExp(`\\b${verb}\\b`, "i").test(text));
+
+  // Measurable achievements (numbers, percentages, currencies)
+  const numbersFound = (text.match(/\b\d+(?:\.\d+)?%?\b/g) || []).filter(n => {
+    // filter out typical years like 2020, 2024, or standard phone digits
+    const val = parseInt(n, 10);
+    return (n.includes("%") || (val > 0 && val < 1900) || val > 2100);
+  });
+  const hasMetrics = numbersFound.length >= 3 || text.includes("%") || /\$\d+/g.test(text);
+
+  // Common Keywords
+  const standardKeywords = ["javascript", "typescript", "python", "java", "react", "node", "sql", "aws", "git", "docker", "agile", "scrum", "analytics", "database", "api", "communication", "leadership", "management"];
+  const matchedKeywords = standardKeywords.filter(k => lower.includes(k));
+
+  // Section Checks
+  const hasContact = /[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}/i.test(text) && /(\+?\d[\s\-.]?){7,15}/.test(text);
+  const hasSummary = /summary|profile|objective|about me/i.test(text) || (wordCount > 50 && lower.substring(0, 300).includes("seeking") || lower.substring(0, 300).includes("passionate"));
+  const hasEducation = /education|university|college|degree|bachelor|master|b\.tech|b\.sc|m\.tech|mba|graduate/i.test(text);
+  const hasSkills = /skills|technologies|tools|expertise/i.test(text);
+  const hasExperience = /experience|employment|work history|career|internship/i.test(text);
+  const hasProjects = /projects|portfolio|built|developed/i.test(text);
+  const hasCertifications = /certifications|certified|credentials/i.test(text);
+  const hasAchievements = /achievements|awards|honors|accomplishments/i.test(text);
+  const hasLanguages = /languages|bilingual|fluent/i.test(text);
+
+  // Section Scoring
+  let contactScore = 0;
+  if (/[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}/i.test(text)) contactScore += 5;
+  if (/(\+?\d[\s\-.]?){7,15}/.test(text)) contactScore += 5;
+  if (/linkedin\.com\//i.test(text)) contactScore += 5;
+  if (/\b(?:street|city|zip|state|country|address|road|drive)\b/i.test(text) || /[A-Z][a-z]+,?\s+[A-Z]{2}\s+\d{5}/.test(text)) contactScore += 5; // Address check
+
+  const summaryScore = hasSummary ? 10 : 0;
+  const educationScore = hasEducation ? 15 : 0;
+  const skillsScore = hasSkills ? (matchedKeywords.length >= 5 ? 15 : 10) : 0;
+  
+  let experienceScore = 0;
+  if (hasExperience) {
+    experienceScore = 10;
+    if (verbMatches.length >= 4) experienceScore += 5;
+    if (wordCount > 350) experienceScore += 5;
+  }
+
+  let projectsScore = 0;
+  if (hasProjects) {
+    projectsScore = 10;
+    if (matchedKeywords.length >= 3) projectsScore += 5;
+  }
+
+  const certificationsScore = hasCertifications ? 5 : 0;
+  const achievementsScore = hasAchievements ? 5 : 0;
+
+  // Formatting & Length Score
+  let formattingScore = 10;
+  if (wordCount < 200) formattingScore -= 5;
+  if (wordCount > 1000) formattingScore -= 3;
+  if (!hasContact) formattingScore -= 2;
+
+  // Compile missing sections
+  if (!/[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}/i.test(text)) missingSections.push("Email Address");
+  if (!/(\+?\d[\s\-.]?){7,15}/.test(text)) missingSections.push("Phone Number");
+  if (!/linkedin\.com\//i.test(text)) missingSections.push("LinkedIn Profile");
+  if (!hasSummary) missingSections.push("Professional Summary");
+  if (!hasEducation) missingSections.push("Education");
+  if (!hasSkills) missingSections.push("Skills Section");
+  if (!hasExperience) missingSections.push("Work Experience");
+  if (!hasProjects) missingSections.push("Projects");
+  if (!hasCertifications) missingSections.push("Certifications");
+  if (!hasAchievements) missingSections.push("Achievements / Awards");
+
+  // Strengths & Weaknesses
+  if (/[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}/i.test(text) && /linkedin\.com\//i.test(text)) {
+    strengths.push("Professional contact info and LinkedIn profile are present.");
+  } else {
+    weaknesses.push("Missing key contact info or LinkedIn link.");
+  }
+
+  if (hasEducation) strengths.push("Education section is clearly defined.");
+  else weaknesses.push("Education section is missing or hard to scan.");
+
+  if (hasSkills && matchedKeywords.length >= 6) {
+    strengths.push("Excellent keyword presence in your skills section.");
+  } else if (!hasSkills) {
+    weaknesses.push("Missing a dedicated skills list.");
+  } else {
+    weaknesses.push("Skills section lacks sufficient industry-relevant keywords.");
+  }
+
+  if (hasExperience) {
+    if (verbMatches.length >= 5) {
+      strengths.push("Strong usage of action-oriented verbs to describe experience.");
+    } else {
+      weaknesses.push("Experience details feel passive. Add more strong action verbs.");
+    }
+  } else {
+    weaknesses.push("No clear professional experience section found.");
+  }
+
+  if (hasMetrics) {
+    strengths.push("Quantified achievements present (percentages, dollars, or metrics).");
+  } else {
+    weaknesses.push("Impact is not quantified. Try adding measurable metrics (%, $, count) to achievements.");
+  }
+
+  if (wordCount >= 400 && wordCount <= 800) {
+    strengths.push("Perfect resume length (ideal word count for single page).");
+  } else if (wordCount < 250) {
+    weaknesses.push("Resume is very brief. Expand descriptions to showcase more depth.");
+  } else {
+    weaknesses.push("Resume is quite wordy. Condense statements to keep it readable.");
+  }
+
+  // Recommendations builder
+  if (!hasContact) recommendations.push("Provide full contact details: email, phone, and professional profiles.");
+  if (!/linkedin\.com\//i.test(text)) recommendations.push("Add a link to your LinkedIn profile to boost your search credibility.");
+  if (!hasSummary) recommendations.push("Draft a 2-3 sentence Professional Summary at the top explaining your unique value.");
+  if (!hasSkills) recommendations.push("Create a clear Skills section categorized by technical, tools, or soft skills.");
+  if (!hasExperience) recommendations.push("Incorporate detailed Work Experience, listing reverse-chronological roles with achievements.");
+  if (!hasProjects) recommendations.push("Showcase 2-3 projects mentioning the technologies used and what you implemented.");
+  if (verbMatches.length < 5) recommendations.push("Replace weak or passive phrasing with powerful action verbs like 'Spearheaded', 'Optimized', 'Engineered', 'Delivered'.");
+  if (!hasMetrics) recommendations.push("Quantify your impact: mention team sizes, percentages of performance increase, or dollars saved.");
+  if (matchedKeywords.length < 5) recommendations.push("Improve your keyword coverage. Review target job descriptions and weave in terms like 'TypeScript', 'Docker', 'Agile', etc.");
+  if (!hasCertifications) recommendations.push("Include any relevant industry Certifications (e.g., AWS, Scrum Master, Google Certificates) to show continuous learning.");
+  if (!hasLanguages) recommendations.push("If you speak multiple languages, list them to stand out for global roles.");
+
+  // Scores calculations
+  // ATS Compatibility Score
+  const atsScore = Math.round(
+    (contactScore / 20) * 15 +
+    (educationScore / 15) * 15 +
+    (skillsScore / 15) * 15 +
+    (experienceScore / 20) * 20 +
+    (projectsScore / 15) * 15 +
+    (certificationsScore / 5) * 5 +
+    (achievementsScore / 5) * 5 +
+    (formattingScore / 10) * 10
+  );
+
+  // Strength Score
+  let strengthScoreVal = 30; // base
+  if (hasContact) strengthScoreVal += 10;
+  if (hasSummary) strengthScoreVal += 5;
+  if (hasEducation) strengthScoreVal += 10;
+  if (hasSkills) strengthScoreVal += 10;
+  if (hasExperience) strengthScoreVal += 10;
+  if (hasProjects) strengthScoreVal += 10;
+  if (hasMetrics) strengthScoreVal += 10;
+  if (verbMatches.length >= 5) strengthScoreVal += 5;
+
+  const strengthScore = Math.min(100, strengthScoreVal);
+
+  // Completion Percentage
+  let detectedSectionsCount = 0;
+  const sectionsToCheck = [hasContact, hasSummary, hasEducation, hasSkills, hasExperience, hasProjects, hasCertifications, hasAchievements, hasLanguages];
+  sectionsToCheck.forEach(s => { if (s) detectedSectionsCount++; });
+  const completionPercentage = Math.round((detectedSectionsCount / sectionsToCheck.length) * 100);
+
+  // Status mappings
+  const getStatus = (score: number, max: number): "good" | "warning" | "poor" => {
+    const pct = (score / max) * 100;
+    if (pct >= 75) return "good";
+    if (pct >= 40) return "warning";
+    return "poor";
+  };
+
+  return {
+    strengthScore,
+    atsScore,
+    completionPercentage,
+    strengths,
+    weaknesses,
+    missingSections,
+    recommendations,
+    sectionBreakdown: {
+      contactInfo: { score: contactScore, maxScore: 20, label: "Contact Information", status: getStatus(contactScore, 20), feedback: hasContact ? "Complete contact info detected." : "Missing phone, email or address." },
+      summary: { score: summaryScore, maxScore: 10, label: "Professional Summary", status: getStatus(summaryScore, 10), feedback: hasSummary ? "Summary section found." : "Add a summary to introduce yourself." },
+      education: { score: educationScore, maxScore: 15, label: "Education", status: getStatus(educationScore, 15), feedback: hasEducation ? "Academic background listed." : "Add degrees or university details." },
+      skills: { score: skillsScore, maxScore: 15, label: "Skills", status: getStatus(skillsScore, 15), feedback: `${matchedKeywords.length} key skill keywords matched.` },
+      experience: { score: experienceScore, maxScore: 20, label: "Work Experience", status: getStatus(experienceScore, 20), feedback: `${verbMatches.length} action verbs detected in descriptions.` },
+      projects: { score: projectsScore, maxScore: 15, label: "Projects", status: getStatus(projectsScore, 15), feedback: hasProjects ? "Projects section present." : "Include side or academic projects." },
+      certifications: { score: certificationsScore, maxScore: 5, label: "Certifications", status: getStatus(certificationsScore, 5), feedback: hasCertifications ? "Certifications listed." : "Add professional credentials." },
+      achievements: { score: achievementsScore, maxScore: 5, label: "Achievements", status: getStatus(achievementsScore, 5), feedback: hasAchievements ? "Awards/achievements listed." : "Highlight achievements or honors." },
+      formatting: { score: formattingScore, maxScore: 10, label: "Formatting & Length", status: getStatus(formattingScore, 10), feedback: `${wordCount} words detected. Formatting looks solid.` },
+    }
+  };
 }

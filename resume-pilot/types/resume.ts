@@ -1,14 +1,20 @@
 export interface ResumeData {
+  documentType: "resume" | "cv";
   fullName: string;
   email: string;
   phone: string;
   linkedin: string;
+  address: string;
   summary: string;
   education: EducationEntry[];
   skills: string;
   projects: ProjectEntry[];
   experience: ExperienceEntry[];
   certifications: string;
+  achievements: string;
+  languages: string;
+  publications?: string;
+  additionalDetails?: string;
 }
 
 export interface EducationEntry {
@@ -60,4 +66,25 @@ export interface SectionScore {
   label: string;
   status: "good" | "warning" | "poor";
   feedback: string;
+}
+
+export interface AdvancedAnalysisResult {
+  strengthScore: number;
+  atsScore: number;
+  completionPercentage: number;
+  strengths: string[];
+  weaknesses: string[];
+  missingSections: string[];
+  recommendations: string[];
+  sectionBreakdown: {
+    contactInfo: SectionScore;
+    summary: SectionScore;
+    education: SectionScore;
+    skills: SectionScore;
+    experience: SectionScore;
+    projects: SectionScore;
+    certifications: SectionScore;
+    achievements: SectionScore;
+    formatting: SectionScore;
+  };
 }

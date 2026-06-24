@@ -24,7 +24,12 @@ function ModernTemplate({ data, previewRef }: { data: ResumeData; previewRef?: R
       style={{ fontFamily: "'Inter', sans-serif", fontSize: "11px", lineHeight: "1.5" }}
     >
       {/* Header */}
-      <div className="bg-gradient-to-r from-blue-700 to-indigo-700 px-8 py-7 text-white animate-fade-in">
+      <div
+        className="px-8 py-7 text-white"
+        style={{
+          backgroundColor: "#1d4ed8",
+        }}
+      >
         <h1 className="text-3xl font-bold tracking-tight" style={{ fontFamily: "'Outfit', sans-serif" }}>
           {data.fullName || "Your Name"}
         </h1>

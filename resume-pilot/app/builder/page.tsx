@@ -54,8 +54,17 @@ export default function BuilderPage() {
       const canvas = await html2canvas(element, {
         scale: 2,
         useCORS: true,
-        logging: false,
+        logging: true,
         backgroundColor: "#ffffff",
+        foreignObjectRendering: false,
+        removeContainer: true,
+        onclone: (doc) => {
+          doc.querySelectorAll("*").forEach((el) => {
+            const htmlEl = el as HTMLElement;
+            htmlEl.style.animation = "none";
+            htmlEl.style.transition = "none";
+          });
+        },
       });
 
       const imgData = canvas.toDataURL("image/png");
@@ -95,11 +104,10 @@ export default function BuilderPage() {
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className={`flex-1 py-3 text-sm font-medium border-b-2 transition-all ${
-                activeTab === tab
+              className={`flex-1 py-3 text-sm font-medium border-b-2 transition-all ${activeTab === tab
                   ? "border-blue-600 text-blue-600"
                   : "border-transparent text-slate-500 hover:text-slate-700"
-              }`}
+                }`}
             >
               {tab === "form" ? "Edit" : "Preview"}
             </button>
@@ -121,8 +129,8 @@ export default function BuilderPage() {
             {downloading && (
               <div className="mt-4 flex items-center gap-2 text-sm text-blue-600 animate-pulse">
                 <svg className="animate-spin w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M8 2a6 6 0 100 12A6 6 0 008 2z" strokeOpacity="0.3"/>
-                  <path d="M14 8a6 6 0 00-6-6" strokeLinecap="round"/>
+                  <path d="M8 2a6 6 0 100 12A6 6 0 008 2z" strokeOpacity="0.3" />
+                  <path d="M14 8a6 6 0 00-6-6" strokeLinecap="round" />
                 </svg>
                 Generating PDF…
               </div>
@@ -160,14 +168,14 @@ export default function BuilderPage() {
               {downloading ? (
                 <>
                   <svg className="animate-spin w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M8 2a6 6 0 100 12" strokeLinecap="round"/>
+                    <path d="M8 2a6 6 0 100 12" strokeLinecap="round" />
                   </svg>
                   Generating PDF…
                 </>
               ) : (
                 <>
                   <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M8 2v8M5 7l3 3 3-3M2 12v1a1 1 0 001 1h10a1 1 0 001-1v-1"/>
+                    <path d="M8 2v8M5 7l3 3 3-3M2 12v1a1 1 0 001 1h10a1 1 0 001-1v-1" />
                   </svg>
                   Download as PDF
                 </>

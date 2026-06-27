@@ -156,21 +156,22 @@ export default function BuilderPage() {
             </div> */}
           </div>
 
-          {/* 📄 PART 2 (BOTTOM 50%): Fully Scrollable Big Immersive Resume Canvas */}
-          <div className="h-1/2 overflow-y-auto p-6 flex flex-col items-center justify-start bg-slate-100 custom-scrollbar">
-            <div className="w-[820px] bg-white shadow-2xl border border-slate-300 rounded-sm overflow-hidden shrink-0 mb-4">
-              <div ref={previewRef} className="w-full bg-white text-slate-900">
+          {/* 📄 PART 2 (BOTTOM 50%): Immersive Independent Scrollable Big Resume Canvas */}
+          <div className="h-1/2 overflow-y-auto p-8 sm:p-12 flex flex-col items-center justify-start bg-slate-100/80 custom-scrollbar shadow-inner">
+            {/* Added clean layout margins and smooth hover transition to the paper sheet */}
+            <div className="w-[820px] my-6 bg-white shadow-[0_20px_50px_rgba(0,0,0,0.12)] border border-slate-200 rounded-sm overflow-hidden shrink-0 transition-all duration-300 hover:shadow-[0_24px_60px_rgba(59,130,246,0.08)]">
+              <div ref={previewRef} className="w-full bg-white text-slate-900 p-2">
                 <ResumePreview data={data} template={template} />
               </div>
             </div>
           </div>
 
           {/* Persistent Sticky Download Footer Deck */}
-          <div className="p-4 bg-white border-t border-slate-200 shrink-0">
+          <div className="p-4 bg-white border-t border-slate-200/80 shrink-0 shadow-[0_-4px_12px_rgba(0,0,0,0.03)] z-10">
             <button
               onClick={handleDownload}
               disabled={downloading}
-              className="w-full flex items-center justify-center gap-2 py-3.5 px-6 text-sm font-bold text-white bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl hover:from-blue-700 hover:to-indigo-700 shadow-md transition-all duration-200 disabled:opacity-60"
+              className="w-full flex items-center justify-center gap-2 py-4 px-6 text-sm font-bold text-white bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl hover:from-blue-700 hover:to-indigo-700 shadow-md hover:shadow-lg transition-all duration-200 active:scale-[0.99] disabled:opacity-60"
             >
               {downloading ? "Processing PDF Object Layers..." : "Download High-Resolution PDF"}
             </button>

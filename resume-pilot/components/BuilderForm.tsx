@@ -56,22 +56,20 @@ export default function BuilderForm({ data, onChange, template, onTemplateChange
               <button
                 type="button"
                 onClick={() => set("documentType", "resume")}
-                className={`flex-1 py-2 text-xs font-semibold rounded-lg transition-all ${
-                  data.documentType === "resume"
+                className={`flex-1 py-2 text-xs font-semibold rounded-lg transition-all ${data.documentType === "resume"
                     ? "bg-white text-blue-600 shadow-sm"
                     : "text-slate-600 hover:text-slate-800"
-                }`}
+                  }`}
               >
                 Resume (Compact ATS layout)
               </button>
               <button
                 type="button"
                 onClick={() => set("documentType", "cv")}
-                className={`flex-1 py-2 text-xs font-semibold rounded-lg transition-all ${
-                  data.documentType === "cv"
+                className={`flex-1 py-2 text-xs font-semibold rounded-lg transition-all ${data.documentType === "cv"
                     ? "bg-white text-blue-600 shadow-sm"
                     : "text-slate-600 hover:text-slate-800"
-                }`}
+                  }`}
               >
                 CV (Detailed Academic layout)
               </button>
@@ -84,15 +82,14 @@ export default function BuilderForm({ data, onChange, template, onTemplateChange
                 <button
                   key={t.id}
                   onClick={() => onTemplateChange(t.id)}
-                  className={`relative p-2.5 rounded-xl border-2 text-left transition-all duration-200 ${
-                    template === t.id
+                  className={`relative p-2.5 rounded-xl border-2 text-left transition-all duration-200 ${template === t.id
                       ? "border-blue-500 bg-blue-50"
                       : "border-slate-200 hover:border-slate-300 bg-white"
-                  }`}
+                    }`}
                 >
                   {template === t.id && (
                     <span className="absolute top-1.5 right-1.5 w-3.5 h-3.5 bg-blue-500 rounded-full flex items-center justify-center">
-                      <svg width="6" height="6" viewBox="0 0 8 8" fill="none"><path d="M1.5 4l1.8 1.8L6.5 2.5" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                      <svg width="6" height="6" viewBox="0 0 8 8" fill="none"><path d="M1.5 4l1.8 1.8L6.5 2.5" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
                     </span>
                   )}
                   <p className={`text-xs font-bold ${template === t.id ? "text-blue-700" : "text-slate-700"}`}>{t.label}</p>
@@ -298,7 +295,7 @@ export default function BuilderForm({ data, onChange, template, onTemplateChange
       )}
 
       {/* Download button */}
-      <button
+      {/* <button
         onClick={onDownload}
         className="w-full flex items-center justify-center gap-2 py-3.5 px-6 text-sm font-semibold text-white bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl hover:from-blue-700 hover:to-indigo-700 shadow-md hover:shadow-lg transition-all duration-200 active:scale-95"
       >
@@ -306,7 +303,7 @@ export default function BuilderForm({ data, onChange, template, onTemplateChange
           <path d="M8 2v8M5 7l3 3 3-3M2 12v1a1 1 0 001 1h10a1 1 0 001-1v-1"/>
         </svg>
         Download {data.documentType === "cv" ? "CV" : "Resume"} as PDF
-      </button>
+      </button> */}
     </div>
   );
 }
@@ -355,7 +352,7 @@ function AddBtn({ onClick, label }: { onClick: () => void; label: string }) {
       className="mt-3 flex items-center gap-1.5 text-sm text-blue-600 font-medium hover:text-blue-700 transition-colors"
     >
       <svg width="15" height="15" viewBox="0 0 15 15" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-        <path d="M7.5 2v11M2 7.5h11"/>
+        <path d="M7.5 2v11M2 7.5h11" />
       </svg>
       {label}
     </button>
@@ -370,7 +367,7 @@ function RemoveBtn({ onClick, label }: { onClick: () => void; label: string }) {
       className="absolute top-3 right-3 w-6 h-6 flex items-center justify-center rounded-full text-slate-400 hover:text-red-500 hover:bg-red-50 transition-all duration-150"
     >
       <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-        <path d="M1 1l10 10M11 1L1 11"/>
+        <path d="M1 1l10 10M11 1L1 11" />
       </svg>
     </button>
   );

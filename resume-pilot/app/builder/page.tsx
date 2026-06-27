@@ -38,6 +38,59 @@ export default function BuilderPage() {
   const resumeText = resumeDataToText(data);
   const atsResult = calculateATSScore(resumeText);
 
+  // const handleDownload = async () => {
+  //   setDownloading(true);
+  //   try {
+  //     if (window.innerWidth < 1024) setActiveTab("preview");
+  //     await new Promise((r) => setTimeout(r, 300));
+
+  //     const html2canvas = (await import("html2canvas")).default;
+  //     const jsPDF = (await import("jspdf")).default;
+
+  //     const element = previewRef.current;
+  //     if (!element) return;
+
+  //     const canvas = await html2canvas(element, {
+  //       scale: 2,
+  //       useCORS: true,
+  //       logging: true,
+  //       backgroundColor: "#ffffff",
+  //       foreignObjectRendering: false,
+  //       removeContainer: true,
+  //       onclone: (clonedDoc: Document) => {
+  //         clonedDoc.querySelectorAll("*").forEach((el) => {
+  //           const htmlEl = el as HTMLElement;
+  //           htmlEl.style.animation = "none";
+  //           htmlEl.style.transition = "none";
+
+  //           const computedStyle = window.getComputedStyle(htmlEl);
+  //           if (computedStyle.backgroundColor.includes("lab(") || computedStyle.backgroundColor.includes("oklch(")) {
+  //             htmlEl.style.backgroundColor = "#ffffff";
+  //           }
+  //           if (computedStyle.color.includes("lab(") || computedStyle.color.includes("oklch(")) {
+  //             htmlEl.style.color = "#1f2937";
+  //           }
+  //           if (htmlEl.style.backgroundImage?.includes("lab(") || htmlEl.style.backgroundImage?.includes("oklch(")) {
+  //             htmlEl.style.backgroundImage = "none";
+  //           }
+  //         });
+  //       },
+  //     });
+
+  //     const imgData = canvas.toDataURL("image/png");
+  //     const pdf = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
+  //     const pdfWidth = pdf.internal.pageSize.getWidth();
+  //     const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+  //     pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
+  //     pdf.save(`${data.fullName.trim().replace(/\s+/g, "_") || "resume"}.pdf`);
+  //   } catch (err) {
+  //     console.error("PDF export failed:", err);
+  //     alert("PDF export failed. Please try again.");
+  //   } finally {
+  //     setDownloading(false);
+  //   }
+  // };
+
   const handleDownload = async () => {
     setDownloading(true);
     try {
@@ -47,45 +100,70 @@ export default function BuilderPage() {
       const html2canvas = (await import("html2canvas")).default;
       const jsPDF = (await import("jspdf")).default;
 
-      const element = previewRef.current;
-      if (!element) return;
+      const originalElement = previewRef.current;
+      if (!originalElement) return;
 
-      const canvas = await html2canvas(element, {
+      // 🚀 THE ULTIMATE BYPASS: Create an isolated print frame sandbox node
+      // Isse original UI screen layout par koi layout disturbance nahi hogi
+      const sandboxContainer = document.createElement("div");
+      sandboxContainer.style.position = "absolute";
+      sandboxContainer.style.left = "-9999px";
+      sandboxContainer.style.top = "-9999px";
+      sandboxContainer.style.width = "820px";
+      sandboxContainer.style.backgroundColor = "#ffffff";
+      sandboxContainer.style.color = "#111827";
+
+      // Clone original element deep layout nodes into the sandbox wrapper
+      const clonedElement = originalElement.cloneNode(true) as HTMLElement;
+      sandboxContainer.appendChild(clonedElement);
+      document.body.appendChild(sandboxContainer);
+
+      // 🧹 SCRUB ALL THE MODERN COLOR SHADERS FROM RUNTIME INLINE DOM SNAPS
+      const allElements = sandboxContainer.getElementsByTagName("*");
+      for (let i = 0; i < allElements.length; i++) {
+        const el = allElements[i] as HTMLElement;
+
+        // Pure text strings force assignments to drop oklch/lab loops entirely
+        if (el.style) {
+          // Force fallback standard hex wrappers over everything
+          const styles = window.getComputedStyle(el);
+
+          if (styles.backgroundColor.includes("oklch") || styles.backgroundColor.includes("lab")) {
+            el.style.setProperty("background-color", "#ffffff", "important");
+          }
+          if (styles.color.includes("oklch") || styles.color.includes("lab")) {
+            el.style.setProperty("color", "#111827", "important");
+          }
+          if (styles.backgroundImage.includes("oklch") || styles.backgroundImage.includes("lab")) {
+            el.style.setProperty("background-image", "none", "important");
+          }
+          if (styles.borderColor.includes("oklch") || styles.borderColor.includes("lab")) {
+            el.style.setProperty("border-color", "#e2e8f0", "important");
+          }
+        }
+      }
+
+      // Pass the fully scrubbed and isolated container element target to html2canvas
+      const canvas = await html2canvas(clonedElement, {
         scale: 2,
         useCORS: true,
-        logging: true,
+        logging: false,
         backgroundColor: "#ffffff",
-        foreignObjectRendering: false,
-        removeContainer: true,
-        onclone: (clonedDoc: Document) => {
-          clonedDoc.querySelectorAll("*").forEach((el) => {
-            const htmlEl = el as HTMLElement;
-            htmlEl.style.animation = "none";
-            htmlEl.style.transition = "none";
-
-            const computedStyle = window.getComputedStyle(htmlEl);
-            if (computedStyle.backgroundColor.includes("lab(") || computedStyle.backgroundColor.includes("oklch(")) {
-              htmlEl.style.backgroundColor = "#ffffff";
-            }
-            if (computedStyle.color.includes("lab(") || computedStyle.color.includes("oklch(")) {
-              htmlEl.style.color = "#1f2937";
-            }
-            if (htmlEl.style.backgroundImage?.includes("lab(") || htmlEl.style.backgroundImage?.includes("oklch(")) {
-              htmlEl.style.backgroundImage = "none";
-            }
-          });
-        },
       });
+
+      // 🧼 CLEANUP REMOVAL: Instantly flush print nodes sandbox context from application root memory 
+      document.body.removeChild(sandboxContainer);
 
       const imgData = canvas.toDataURL("image/png");
       const pdf = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
       const pdfWidth = pdf.internal.pageSize.getWidth();
       const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+
       pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
       pdf.save(`${data.fullName.trim().replace(/\s+/g, "_") || "resume"}.pdf`);
     } catch (err) {
       console.error("PDF export failed:", err);
-      alert("PDF export failed. Please try again.");
+      alert("Something went wrong during canvas compiling. Please try hitting download again!");
     } finally {
       setDownloading(false);
     }

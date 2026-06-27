@@ -38,7 +38,6 @@ export default function BuilderPage() {
   const resumeText = resumeDataToText(data);
   const atsResult = calculateATSScore(resumeText);
 
-  // 💡 FIXED DYNAMIC CONTAINER PRINT MATRIX FOR EXTENSIONS (CLEARS ALL OKLCH/LAB ERRORS)
   const handleDownload = async () => {
     setDownloading(true);
     try {
@@ -86,7 +85,7 @@ export default function BuilderPage() {
       pdf.save(`${data.fullName.trim().replace(/\s+/g, "_") || "resume"}.pdf`);
     } catch (err) {
       console.error("PDF export failed:", err);
-      alert("PDF export failed. Please verify configurations layout context.");
+      alert("PDF export failed. Please try again.");
     } finally {
       setDownloading(false);
     }
@@ -96,10 +95,10 @@ export default function BuilderPage() {
     <div className="flex flex-col h-screen bg-slate-50 overflow-hidden">
       <Navbar />
 
-      {/* 💻 TRUE SPLIT SCREEN LAYOUT WRAPPER CONTROLLER */}
+      {/* 💻 MAIN SPLIT SCREEN INTERACTIVE WORKSPACE */}
       <div className="flex flex-col lg:flex-row flex-1 overflow-hidden">
 
-        {/* Left Side Panel — Typing Content Inputs Section */}
+        {/* LEFT VIEW MODULE: Edit Inputs Form (Scrolls Independently) */}
         <div
           className={`w-full lg:w-1/2 flex flex-col h-full bg-white border-r border-slate-200 ${activeTab === "preview" ? "hidden lg:flex" : "flex"
             }`}
@@ -107,29 +106,17 @@ export default function BuilderPage() {
           <div className="px-6 py-4 border-b border-slate-200 bg-slate-50 flex justify-between items-center shrink-0">
             <div>
               <h1 className="text-xl font-bold text-slate-900" style={{ fontFamily: "'Outfit', sans-serif" }}>
-                Resume Data Core
+                Resume Controls
               </h1>
-              <p className="text-xs text-slate-500">Modify your data field inputs components below.</p>
+              <p className="text-xs text-slate-500">Provide parameters securely below.</p>
             </div>
 
-            {/* Mobile Navigation Interface Link Matrix */}
             <div className="lg:hidden flex rounded-md border border-slate-200 p-1 bg-white">
-              <button
-                onClick={() => setActiveTab("form")}
-                className={`px-3 py-1 text-xs font-semibold rounded-md ${activeTab === "form" ? "bg-blue-600 text-white" : "text-slate-600"}`}
-              >
-                Inputs View
-              </button>
-              <button
-                onClick={() => setActiveTab("preview")}
-                className={`px-3 py-1 text-xs font-semibold rounded-md ${activeTab === "preview" ? "bg-blue-600 text-white" : "text-slate-600"}`}
-              >
-                Live Preview
-              </button>
+              <button onClick={() => setActiveTab("form")} className={`px-3 py-1 text-xs font-semibold rounded-md ${activeTab === "form" ? "bg-blue-600 text-white" : "text-slate-600"}`}>Inputs</button>
+              <button onClick={() => setActiveTab("preview")} className={`px-3 py-1 text-xs font-semibold rounded-md ${activeTab === "preview" ? "bg-blue-600 text-white" : "text-slate-600"}`}>Preview</button>
             </div>
           </div>
 
-          {/* Scrolling Panel Form Entry Body */}
           <div className="flex-1 overflow-y-auto p-6 space-y-4 custom-scrollbar">
             <BuilderForm
               data={data}
@@ -141,35 +128,54 @@ export default function BuilderPage() {
           </div>
         </div>
 
-        {/* Right Side Panel — Live Resume Mirror Preview & Real-time ATS Analytics Progress */}
+        {/* RIGHT VIEW MODULE: 50:50 Perfect Ratio Split System */}
         <div
-          className={`w-full lg:w-1/2 flex flex-col h-full bg-slate-100/60 ${activeTab === "form" ? "hidden lg:flex" : "flex"
+          className={`w-full lg:w-1/2 flex flex-col h-full bg-slate-200 ${activeTab === "form" ? "hidden lg:flex" : "flex"
             }`}
         >
-          {/* Real-time Score Tracking Header Node */}
-          <div className="p-4 border-b border-slate-200 bg-white shadow-sm shrink-0">
+
+          {/* 📊 PART 1 (TOP 50%): Fully Scrollable Health Report Card */}
+          <div className="h-1/2 overflow-y-auto p-4 border-b border-slate-200 bg-white shadow-sm custom-scrollbar">
             <HealthReport data={data} atsScore={atsResult.totalScore} />
+
+            {/* Template Blueprint Switcher Row Inside Top Control Frame
+            <div className="flex items-center justify-between mt-3 pt-3 border-t border-slate-100">
+              <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Active Layout:</span>
+              <div className="flex rounded-lg border border-slate-200 p-1 bg-slate-50 gap-1">
+                {(["minimal", "modern", "professional"] as TemplateType[]).map((t) => (
+                  <button
+                    key={t}
+                    onClick={() => setTemplate(t)}
+                    className={`px-3 py-1 text-xs font-bold capitalize rounded-md transition-all ${template === t ? "bg-blue-600 text-white shadow-sm" : "text-slate-600 hover:text-slate-900"
+                      }`}
+                  >
+                    {t}
+                  </button>
+                ))}
+              </div>
+            </div> */}
           </div>
 
-          {/* Mirror Render Layout Area */}
-          <div className="flex-1 overflow-y-auto p-6 flex flex-col items-center justify-start custom-scrollbar">
-            <div className="w-full max-w-[820px] bg-white shadow-xl border border-slate-200 rounded-sm overflow-x-auto">
-              <div className="min-w-[760px]">
-                <ResumePreview data={data} template={template} previewRef={previewRef} />
+          {/* 📄 PART 2 (BOTTOM 50%): Fully Scrollable Big Immersive Resume Canvas */}
+          <div className="h-1/2 overflow-y-auto p-6 flex flex-col items-center justify-start bg-slate-100 custom-scrollbar">
+            <div className="w-[820px] bg-white shadow-2xl border border-slate-300 rounded-sm overflow-hidden shrink-0 mb-4">
+              <div ref={previewRef} className="w-full bg-white text-slate-900">
+                <ResumePreview data={data} template={template} />
               </div>
             </div>
           </div>
 
-          {/* Sticky Document Vector Stream Compiler Trigger Footer */}
-          <div className="p-4 bg-white border-t border-slate-200 shrink-0 flex gap-4">
+          {/* Persistent Sticky Download Footer Deck */}
+          <div className="p-4 bg-white border-t border-slate-200 shrink-0">
             <button
               onClick={handleDownload}
               disabled={downloading}
-              className="w-full flex items-center justify-center gap-2 py-3.5 px-6 text-sm font-bold text-white bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl hover:from-blue-700 hover:to-indigo-700 shadow-md hover:shadow-lg transition-all duration-200 active:scale-[0.99] disabled:opacity-60 disabled:cursor-not-allowed"
+              className="w-full flex items-center justify-center gap-2 py-3.5 px-6 text-sm font-bold text-white bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl hover:from-blue-700 hover:to-indigo-700 shadow-md transition-all duration-200 disabled:opacity-60"
             >
-              {downloading ? "Compiling Document Matrix..." : "Download Export-Ready PDF"}
+              {downloading ? "Processing PDF Object Layers..." : "Download High-Resolution PDF"}
             </button>
           </div>
+
         </div>
 
       </div>

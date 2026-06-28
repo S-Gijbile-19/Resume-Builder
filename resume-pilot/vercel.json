@@ -2,7 +2,7 @@
   "redirects": [
     {
       "source": "/",
-      "destination": "/builder",
+      "destination": "/app",
       "permanent": true
     }
   ]

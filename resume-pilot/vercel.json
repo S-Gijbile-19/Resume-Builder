@@ -1,0 +1,9 @@
+{
+  "redirects": [
+    {
+      "source": "/",
+      "destination": "/builder",
+      "permanent": true
+    }
+  ]
+}

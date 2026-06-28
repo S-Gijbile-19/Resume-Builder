@@ -1,9 +1,4 @@
 {
-  "redirects": [
-    {
-      "source": "/",
-      "destination": "/app",
-      "permanent": true
-    }
-  ]
+  "cleanUrls": true,
+  "trailingSlash": false
 }
